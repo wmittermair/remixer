@@ -4,7 +4,10 @@
   "private": true,
   "homepage": "https://wmittermair.github.io/remixer",
   "dependencies": {
+    "@supabase/supabase-js": "^2.48.1",
     "cra-template-typescript": "1.2.0",
+    "dotenv": "^16.4.7",
+    "framer-motion": "^12.0.5",
     "openai": "^4.80.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
