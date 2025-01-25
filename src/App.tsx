@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FaDatabase, FaTwitter } from 'react-icons/fa';
+import { FaDatabase, FaTwitter, FaEdit } from 'react-icons/fa';
 import SavedTweetsModal from './components/SavedTweetsModal';
 import { useTweets } from './hooks/useTweets';
 import OpenAI from 'openai';
@@ -22,7 +22,10 @@ function App() {
   const [generatedTweets, setGeneratedTweets] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [isSavedTweetsOpen, setIsSavedTweetsOpen] = useState(false);
+  const [isSavedTweetsOpen, setIsSavedTweetsOpen] = useState(true);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
+  const [editingTweetIndex, setEditingTweetIndex] = useState<number | null>(null);
+  const [editingTweetContent, setEditingTweetContent] = useState<string>('');
 
   // Tweets-Hook integrieren
   const { 
@@ -101,6 +104,13 @@ function App() {
     window.open(twitterUrl, '_blank');
   };
 
+  const handleEditSave = (index: number) => {
+    const newTweets = [...generatedTweets];
+    newTweets[index] = editingTweetContent;
+    setGeneratedTweets(newTweets);
+    setEditingTweetIndex(null);
+  };
+
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 py-6 flex flex-col justify-center sm:py-12">
@@ -153,10 +163,29 @@ function App() {
                     Beauty Tweet Remixer
                   </h1>
                   <button
-                    onClick={() => setIsSavedTweetsOpen(true)}
-                    className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-indigo-500 text-white px-4 py-2 rounded-lg hover:from-blue-600 hover:to-indigo-600"
+                    onClick={() => {
+                      if (!isSavedTweetsOpen) {
+                        setIsSavedTweetsOpen(true);
+                        setIsSidebarCollapsed(false);
+                      } else {
+                        setIsSidebarCollapsed(!isSidebarCollapsed);
+                      }
+                    }}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all group relative
+                      ${tweets.length > 0 
+                        ? 'bg-gradient-to-r from-blue-500 to-indigo-500 text-white hover:from-blue-600 hover:to-indigo-600' 
+                        : 'bg-gray-200 text-gray-500 hover:bg-gray-300'}`}
+                    title={tweets.length === 0 ? "Noch keine Tweets gespeichert" : ""}
                   >
-                    <FaDatabase /> Gespeicherte Tweets
+                    <FaDatabase className={tweets.length === 0 ? 'opacity-50' : ''} />
+                    <span>
+                      {tweets.length} {tweets.length === 1 ? 'Gespeicherter Tweet' : 'Gespeicherte Tweets'}
+                    </span>
+                    {tweets.length === 0 && (
+                      <div className="absolute left-1/2 -translate-x-1/2 -bottom-8 whitespace-nowrap bg-gray-800 text-white text-sm px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">
+                        Noch keine Tweets gespeichert
+                      </div>
+                    )}
                   </button>
                 </div>
 
@@ -193,21 +222,58 @@ function App() {
                 <div className="space-y-4">
                   {generatedTweets.map((tweet, index) => (
                     <div key={index} className="border p-4 rounded-lg bg-gradient-to-r from-blue-50 to-indigo-50">
-                      <p className="mb-3">{tweet}</p>
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => handleTweetClick(tweet)}
-                          className="flex items-center gap-1 bg-gradient-to-r from-blue-500 to-indigo-500 text-white px-4 py-2 rounded hover:from-blue-600 hover:to-indigo-600"
-                        >
-                          <FaTwitter /> Twittern
-                        </button>
-                        <button
-                          onClick={() => handleSaveTweet(tweet)}
-                          className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-4 py-2 rounded hover:from-green-600 hover:to-emerald-600"
-                        >
-                          Speichern
-                        </button>
-                      </div>
+                      {editingTweetIndex === index ? (
+                        <div className="space-y-4">
+                          <textarea
+                            value={editingTweetContent}
+                            onChange={(e) => setEditingTweetContent(e.target.value)}
+                            className="w-full p-4 border border-gray-200 rounded-xl resize-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-700 min-h-[120px]"
+                            placeholder="Tweet bearbeiten..."
+                          />
+                          <div className="flex gap-3">
+                            <button
+                              onClick={() => handleEditSave(index)}
+                              className="bg-blue-500 text-white px-6 py-2.5 rounded-lg text-sm font-medium hover:bg-blue-600 transition-colors flex-1 flex items-center justify-center gap-2"
+                            >
+                              Speichern
+                            </button>
+                            <button
+                              onClick={() => setEditingTweetIndex(null)}
+                              className="bg-gray-100 text-gray-700 px-6 py-2.5 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors flex-1 flex items-center justify-center gap-2"
+                            >
+                              Abbrechen
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <>
+                          <p className="mb-3">{tweet}</p>
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => handleTweetClick(tweet)}
+                              className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-indigo-500 text-white px-4 py-2 rounded-lg hover:from-blue-600 hover:to-indigo-600"
+                            >
+                              <FaTwitter className="text-lg" /> Twittern
+                            </button>
+                            <button
+                              onClick={() => handleSaveTweet(tweet)}
+                              className="flex items-center gap-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white px-4 py-2 rounded-lg hover:from-green-600 hover:to-emerald-600"
+                            >
+                              Speichern
+                            </button>
+                            <button
+                              onClick={() => {
+                                setEditingTweetIndex(index);
+                                setEditingTweetContent(tweet);
+                              }}
+                              className="flex items-center justify-center bg-gray-100 text-gray-700 p-2.5 rounded-lg hover:bg-gray-200 transition-colors"
+                              aria-label="Bearbeiten"
+                            >
+                              <FaEdit className="text-lg" />
+                            </button>
+                          </div>
+                        </>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -226,6 +292,8 @@ function App() {
         onTweet={handleTweetClick}
         isLoading={tweetsLoading}
         error={tweetsError}
+        isCollapsed={isSidebarCollapsed}
+        onCollapsedChange={setIsSidebarCollapsed}
       />
     </div>
   );
