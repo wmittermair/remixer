@@ -97,6 +97,8 @@ function App() {
 
   const handleSaveTweet = async (content: string) => {
     await saveTweet(content);
+    setIsSavedTweetsOpen(true);
+    setIsSidebarCollapsed(false);
   };
 
   const handleTweetClick = (tweet: string) => {
@@ -230,16 +232,16 @@ function App() {
                             className="w-full p-4 border border-gray-200 rounded-xl resize-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-700 min-h-[120px]"
                             placeholder="Tweet bearbeiten..."
                           />
-                          <div className="flex gap-3">
+                          <div className="flex flex-wrap gap-3">
                             <button
                               onClick={() => handleEditSave(index)}
-                              className="bg-blue-500 text-white px-6 py-2.5 rounded-lg text-sm font-medium hover:bg-blue-600 transition-colors flex-1 flex items-center justify-center gap-2"
+                              className="flex items-center justify-center gap-2 bg-gradient-to-r from-blue-500 to-indigo-500 text-white px-5 py-2.5 rounded-lg text-sm font-medium hover:from-blue-600 hover:to-indigo-600 flex-1"
                             >
                               Speichern
                             </button>
                             <button
                               onClick={() => setEditingTweetIndex(null)}
-                              className="bg-gray-100 text-gray-700 px-6 py-2.5 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors flex-1 flex items-center justify-center gap-2"
+                              className="flex items-center justify-center gap-2 bg-gray-100 text-gray-700 px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-gray-200 flex-1"
                             >
                               Abbrechen
                             </button>
@@ -248,18 +250,18 @@ function App() {
                       ) : (
                         <>
                           <p className="mb-3">{tweet}</p>
-                          <div className="flex gap-2">
+                          <div className="flex flex-wrap gap-3">
                             <button
                               onClick={() => handleTweetClick(tweet)}
-                              className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-indigo-500 text-white px-4 py-2 rounded-lg hover:from-blue-600 hover:to-indigo-600"
+                              className="flex items-center justify-center gap-2 bg-gradient-to-r from-blue-500 to-indigo-500 text-white px-5 py-2.5 rounded-lg text-sm font-medium hover:from-blue-600 hover:to-indigo-600 flex-1"
                             >
                               <FaTwitter className="text-lg" /> Twittern
                             </button>
                             <button
                               onClick={() => handleSaveTweet(tweet)}
-                              className="flex items-center gap-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white px-4 py-2 rounded-lg hover:from-green-600 hover:to-emerald-600"
+                              className="flex items-center justify-center gap-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white px-5 py-2.5 rounded-lg text-sm font-medium hover:from-green-600 hover:to-emerald-600 flex-1"
                             >
-                              Speichern
+                              <FaDatabase className="text-lg" /> Speichern
                             </button>
                             <button
                               onClick={() => {
